@@ -3,7 +3,6 @@ import { useCities } from "@/hooks/useCities";
 import { useApartments } from "@/hooks/useApartments";
 import { useState, useEffect } from "react";
 import { ApartmentCard } from "@/components/apartmentCard";
-import { url } from "inspector";
 
 export default function Home() {
   const { cities, loading: citiesLoading, error: citiesError } = useCities();

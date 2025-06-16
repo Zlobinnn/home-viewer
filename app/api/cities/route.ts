@@ -1,5 +1,5 @@
 import { prisma } from '@/prisma/prisma-client'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 // GET /api/cities - получить все города
 export async function GET() {
@@ -16,6 +16,7 @@ export async function GET() {
     })
     return NextResponse.json(cities)
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: 'Failed to fetch cities' },
       { status: 500 }
@@ -24,7 +25,7 @@ export async function GET() {
 }
 
 // POST /api/cities - создать новый город
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const { name, description } = await request.json()
 
   try {
@@ -33,6 +34,7 @@ export async function POST(request: Request) {
     })
     return NextResponse.json(city, { status: 201 })
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: 'City creation failed' },
       { status: 400 }

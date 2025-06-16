@@ -1,14 +1,15 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/prisma/prisma-client'
 
 // GET /api/apartments/[id] - получить квартиру по ID
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const apartment = await prisma.apartment.findUnique({
-      where: { id: parseInt(params.id) },
+      where: { id: parseInt(id) },
       include: {
         city: {
           select: {
@@ -28,6 +29,7 @@ export async function GET(
 
     return NextResponse.json(apartment)
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: 'Failed to fetch apartment' },
       { status: 500 }
@@ -37,14 +39,15 @@ export async function GET(
 
 // PUT /api/apartments/[id] - обновить квартиру
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const data = await request.json()
-
   try {
+    const { id } = await params;
+    const data = await request.json()
+
     const updatedApartment = await prisma.apartment.update({
-      where: { id: parseInt(params.id) },
+      where: { id: parseInt(id) },
       data: {
         ...data,
         cityId: data.cityId ? parseInt(data.cityId) : undefined,
@@ -67,18 +70,20 @@ export async function PUT(
 
 // DELETE /api/apartments/[id] - удалить квартиру
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await prisma.apartment.delete({
-      where: { id: parseInt(params.id) }
+      where: { id: parseInt(id) }
     })
     return NextResponse.json(
       { message: 'Apartment deleted successfully' },
       { status: 200 }
     )
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: 'Apartment deletion failed' },
       { status: 400 }

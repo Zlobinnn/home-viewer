@@ -1,8 +1,8 @@
 import { prisma } from '@/prisma/prisma-client'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 // GET /api/apartments - получить все квартиры (с фильтрацией по городу)
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const cityId = searchParams.get('cityId')
 
@@ -22,6 +22,7 @@ export async function GET(request: Request) {
     })
     return NextResponse.json(apartments)
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: 'Failed to fetch apartments' },
       { status: 500 }
@@ -47,6 +48,7 @@ export async function POST(request: Request) {
     })
     return NextResponse.json(apartment, { status: 201 })
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: 'Apartment creation failed' },
       { status: 400 }
