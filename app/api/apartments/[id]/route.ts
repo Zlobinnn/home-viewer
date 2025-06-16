@@ -44,27 +44,24 @@ export async function PUT(
 ) {
   try {
     const { id } = await params;
-    const data = await request.json()
+    const data = await request.json();
+    
+    // Удаляем id из данных, если он там есть
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id: _, cityId: __, city: ___, ...updateData } = data;
 
     const updatedApartment = await prisma.apartment.update({
       where: { id: parseInt(id) },
-      data: {
-        ...data,
-        cityId: data.cityId ? parseInt(data.cityId) : undefined,
-        rooms: data.rooms ? parseInt(data.rooms) : undefined,
-        floor: data.floor ? parseInt(data.floor) : undefined,
-        totalFloors: data.totalFloors ? parseInt(data.totalFloors) : undefined,
-        price: data.price ? parseFloat(data.price) : undefined,
-        area: data.area ? parseFloat(data.area) : undefined
-      }
-    })
-    return NextResponse.json(updatedApartment)
+      data: updateData
+    });
+    
+    return NextResponse.json(updatedApartment);
   } catch (error) {
     console.error("Ошибка при обновлении квартиры:", error);
     return NextResponse.json(
       { error: 'Apartment update failed' },
       { status: 400 }
-    )
+    );
   }
 }
 

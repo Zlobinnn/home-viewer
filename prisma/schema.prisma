@@ -18,22 +18,22 @@ model City {
 }
 
 model Apartment {
-  id          Int         @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   url         String?
   title       String?
   price       Float?
   address     String?
   description String?
   rooms       Int?
-  area        Float?       // площадь в м²
+  area        Float? // площадь в м²
   floor       Int?
   totalFloors Int?
-  imageUrls   String[]    // массив URL изображений
-  pros        String[]    // массив преимуществ
-  cons        String[]    // массив недостатков
-  isFeatured  Boolean?     @default(false)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  city        City        @relation(fields: [cityId], references: [id])
+  imageUrl    String? // массив URL изображений
+  pros        String[] // массив преимуществ
+  cons        String[] // массив недостатков
+  isFeatured  Boolean? @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  city        City     @relation(fields: [cityId], references: [id])
   cityId      Int
 }

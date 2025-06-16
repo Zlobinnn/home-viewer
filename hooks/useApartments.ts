@@ -1,30 +1,26 @@
 // hooks/useApartments.ts
 import { useState, useEffect } from 'react';
 
-export interface Apartment {
-  id: string;
-  url?: string;
-  title?: string;
-  price?: number;
-  address?: string;
-  cityId: string;
+interface ApartmentType {
+  id?: number;
+  title: string;
+  url: string;
+  price: number;
+  address: string;
   pros: string[];
   cons: string[];
-  imageUrl?: string;
 }
 
 export const useApartments = (cityId?: string) => {
-  const [apartments, setApartments] = useState<Apartment[]>([]);
+  const [apartments, setApartments] = useState<ApartmentType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchApartments = async () => {
       try {
-        const url = cityId 
-          ? `/api/apartments?cityId=${cityId}`
-          : '/api/apartments';
-        
+        const url = `/api/apartments?cityId=${cityId}`
+
         const response = await fetch(url);
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -41,7 +37,7 @@ export const useApartments = (cityId?: string) => {
     fetchApartments();
   }, [cityId]);
 
-  const addApartment = async (newApartment: Omit<Apartment, 'id'>) => {
+  const addApartment = async (newApartment: ApartmentType) => {
     try {
       const response = await fetch('/api/apartments', {
         method: 'POST',
@@ -58,35 +54,41 @@ export const useApartments = (cityId?: string) => {
     }
   };
 
-  const updateApartment = async (updatedData: Partial<Apartment>) => {
+  const updateApartment = async (updatedData: ApartmentType) => {
     try {
+      // Преобразуем price в число, если он строковый
+      const dataToSend = {
+        ...updatedData,
+        price: Number(updatedData.price), // Принудительно преобразуем в number
+      };
+
       const response = await fetch(`/api/apartments/${updatedData.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(updatedData),
+        body: JSON.stringify(dataToSend), // Отправляем исправленные данные
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to update apartment');
       }
-      
+
       const updatedApartment = await response.json();
-      
-      setApartments(prev => 
-        prev.map(apt => 
+
+      setApartments(prev =>
+        prev.map(apt =>
           apt.id === updatedData.id ? { ...apt, ...updatedApartment } : apt
         )
       );
-      
+
       return updatedApartment;
     } catch (err) {
       throw err instanceof Error ? err : new Error('Failed to update apartment');
     }
   };
 
-  const deleteApartment = async (id: string) => {
+  const deleteApartment = async (id: number) => {
     try {
       await fetch(`/api/apartments/${id}`, {
         method: 'DELETE',
@@ -97,12 +99,12 @@ export const useApartments = (cityId?: string) => {
     }
   };
 
-  return { 
-    apartments, 
-    loading, 
-    error, 
-    addApartment, 
+  return {
+    apartments,
+    loading,
+    error,
+    addApartment,
     updateApartment,
-    deleteApartment 
+    deleteApartment
   };
 };

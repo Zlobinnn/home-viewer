@@ -30,9 +30,9 @@ export default function Home() {
       url: "",
       price: 0,
       address: "",
-      cityId: activeTab,
       pros: [],
       cons: [],
+      cityId: activeTab,
     };
     
     try {
@@ -96,7 +96,7 @@ export default function Home() {
             <ApartmentCard 
               key={apartment.id}
               apartment={apartment}
-              onDelete={() => deleteApartment(apartment.id)} cityName={""}
+              onDelete={() => deleteApartment(apartment.id || 0)} cityName={cities.find(city => city.id === activeTab)?.name || ''}
               onSave={(data) => updateApartment(data)}/>
           ))
         )}

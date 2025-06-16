@@ -1,46 +1,39 @@
 import React, { useState } from "react";
 
 interface Props {
-  apartment: {
-    id: string;
-    url?: string;
-    title?: string;
-    price?: number;
-    address?: string;
-    cityId: string;
-    pros: string[];
-    cons: string[];
-    imageUrl?: string;
-  };
   cityName: string;
   onDelete?: (id: string) => Promise<void>;
-  onSave?: (data: {
-    id: string;
-    title?: string;
-    price?: number;
-    address?: string;
-    pros: string[];
-    cons: string[];
-    imageUrl?: string;
-  }) => Promise<void>;
+  onSave?: (data: ApartmentType) => Promise<void>;
   className?: string;
+  apartment: ApartmentType;
 }
 
-export const ApartmentCard: React.FC<Props> = ({ 
-  apartment, 
-  cityName, 
-  onDelete, 
-  onSave, 
-  className 
+interface ApartmentType {
+  id?: number;
+  title: string;
+  url: string;
+  price: number;
+  address: string;
+  pros: string[];
+  cons: string[];
+  imageUrl?: string;
+}
+
+export const ApartmentCard: React.FC<Props> = ({
+  apartment,
+  cityName,
+  onDelete,
+  onSave,
+  className
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [formData, setFormData] = useState({
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [formData, setFormData] = useState<ApartmentType>({
     ...apartment,
-    price: apartment.price?.toString() || '',
   });
 
-  const handleInputChange = (field: keyof typeof formData, value: string | string[]) => {
+  const handleInputChange = (field: keyof typeof formData, value: string | string[] | number) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -64,24 +57,22 @@ export const ApartmentCard: React.FC<Props> = ({
 
   const toggleEdit = () => {
     setIsEditing(!isEditing);
+    setShowDeleteConfirm(false);
     if (!isEditing) {
       // Сброс формы при отмене редактирования
       setFormData({
         ...apartment,
-        price: apartment.price?.toString() || '',
       });
     }
   };
 
   const handleSave = async () => {
     if (!onSave) return;
-    
+
     setIsSaving(true);
     try {
       await onSave({
         ...formData,
-        id: apartment.id,
-        price: formData.price ? parseFloat(formData.price) : undefined
       });
       setIsEditing(false);
     } catch (error) {
@@ -94,13 +85,13 @@ export const ApartmentCard: React.FC<Props> = ({
   const handleDelete = async () => {
     if (!onDelete) return;
     try {
-      await onDelete(apartment.id);
+      await onDelete((apartment.id || 0).toString());
     } catch (error) {
       console.error("Ошибка при удалении:", error);
     }
   };
 
-  const formatPrice = (price?: number) => {
+  const formatPrice = (price?: number | null) => {
     if (!price) return "Цена не указана";
     return new Intl.NumberFormat('ru-RU', {
       style: 'currency',
@@ -109,13 +100,19 @@ export const ApartmentCard: React.FC<Props> = ({
     }).format(price);
   };
 
+  const handleTitleClick = () => {
+    if (!isEditing && formData.url) {
+      window.open(formData.url, '_blank');
+    }
+  };
+
   return (
     <div className={`relative flex items-start justify-start min-h-[400px] w-full bg-white p-6 rounded-xl shadow-md border border-gray-100 ${className}`}>
       {/* Кнопки управления */}
       <div className="absolute top-4 right-4 flex gap-2">
         {isEditing ? (
           <>
-            <button 
+            <button
               onClick={handleSave}
               disabled={isSaving}
               className="p-2 rounded-full hover:bg-green-100 transition-colors text-green-600 disabled:opacity-50"
@@ -131,7 +128,7 @@ export const ApartmentCard: React.FC<Props> = ({
                 </svg>
               )}
             </button>
-            <button 
+            <button
               onClick={toggleEdit}
               className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-600"
               aria-label="Отменить"
@@ -140,30 +137,51 @@ export const ApartmentCard: React.FC<Props> = ({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-          </>
-        ) : (
-          <>
-            <button 
-              onClick={toggleEdit}
-              className="p-2 rounded-full hover:bg-gray-100 transition-colors text-rose-500"
-              aria-label="Редактировать"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-              </svg>
-            </button>
             {onDelete && (
-              <button 
-                onClick={handleDelete}
-                className="p-2 rounded-full hover:bg-red-100 transition-colors text-red-500"
-                aria-label="Удалить"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setShowDeleteConfirm(!showDeleteConfirm)}
+                  className="p-2 rounded-full hover:bg-red-100 transition-colors text-red-500"
+                  aria-label="Удалить"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+                {showDeleteConfirm && (
+                  <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                    <div className="p-2 text-sm text-gray-700">
+                      <p className="mb-2">Удалить эту квартиру?</p>
+                      <div className="flex justify-end space-x-2">
+                        <button
+                          onClick={() => setShowDeleteConfirm(false)}
+                          className="px-2 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded"
+                        >
+                          Отмена
+                        </button>
+                        <button
+                          onClick={handleDelete}
+                          className="px-2 py-1 text-sm text-white bg-red-500 hover:bg-red-600 rounded"
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
           </>
+        ) : (
+          <button
+            onClick={toggleEdit}
+            className="p-2 rounded-full hover:bg-gray-100 transition-colors text-rose-500"
+            aria-label="Редактировать"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+          </button>
         )}
       </div>
 
@@ -178,7 +196,10 @@ export const ApartmentCard: React.FC<Props> = ({
               placeholder="Название квартиры"
             />
           ) : (
-            <h2 className="text-2xl font-semibold text-gray-900">
+            <h2 
+              className={`text-2xl font-semibold text-gray-900 ${formData.url ? 'cursor-pointer hover:text-rose-600' : ''}`}
+              onClick={handleTitleClick}
+            >
               {formData.title || "Без названия"}
             </h2>
           )}
@@ -188,20 +209,32 @@ export const ApartmentCard: React.FC<Props> = ({
         </div>
         <div className="flex-1 bg-gray-50 rounded-lg overflow-hidden">
           {isEditing ? (
-            <div className="flex flex-col items-center justify-center h-full p-4">
-              <label className="text-gray-500 mb-2">URL изображения:</label>
-              <input
-                type="text"
-                value={formData.imageUrl || ''}
-                onChange={(e) => handleInputChange('imageUrl', e.target.value)}
-                placeholder="Введите URL фотографии"
-                className="w-full p-2 border border-gray-300 rounded"
-              />
+            <div className="flex flex-col h-full p-4 space-y-4">
+              <div className="w-full">
+                <label className="text-gray-500 text-sm">URL квартиры:</label>
+                <input
+                  type="text"
+                  value={formData.url || ''}
+                  onChange={(e) => handleInputChange('url', e.target.value)}
+                  placeholder="https://example.com"
+                  className="w-full p-2 border border-gray-300 rounded mt-1"
+                />
+              </div>
+              <div className="w-full">
+                <label className="text-gray-500 text-sm">URL изображения:</label>
+                <input
+                  type="text"
+                  value={formData.imageUrl || ''}
+                  onChange={(e) => handleInputChange('imageUrl', e.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                  className="w-full p-2 border border-gray-300 rounded mt-1"
+                />
+              </div>
             </div>
           ) : formData.imageUrl ? (
-            <img 
-              src={formData.imageUrl} 
-              alt={formData.title || 'Квартира'} 
+            <img
+              src={formData.imageUrl}
+              alt={formData.title || 'Квартира'}
               className="w-full h-full object-cover"
             />
           ) : (
@@ -217,9 +250,9 @@ export const ApartmentCard: React.FC<Props> = ({
           {isEditing ? (
             <>
               <input
-                type="text"
+                type="number"
                 value={formData.price || ''}
-                onChange={(e) => handleInputChange('price', e.target.value)}
+                onChange={(e) => handleInputChange('price', Number(e.target.value))}
                 className="text-2xl font-bold text-rose-600 mb-1 w-full border-b border-rose-200 focus:border-rose-500 focus:outline-none"
                 placeholder="Цена"
               />
@@ -248,7 +281,7 @@ export const ApartmentCard: React.FC<Props> = ({
             <div className="flex justify-between items-center mb-2">
               <h3 className="font-bold text-gray-800">Плюсы</h3>
               {isEditing && (
-                <button 
+                <button
                   onClick={() => addItem('pros')}
                   className="text-rose-500 text-xs flex items-center hover:text-rose-600"
                 >
@@ -269,7 +302,7 @@ export const ApartmentCard: React.FC<Props> = ({
                         className="w-full border-b border-rose-200 focus:border-rose-500 focus:outline-none"
                         placeholder="Преимущество"
                       />
-                      <button 
+                      <button
                         onClick={() => removeItem('pros', index)}
                         className="ml-2 text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
@@ -293,7 +326,7 @@ export const ApartmentCard: React.FC<Props> = ({
             <div className="flex justify-between items-center mb-2">
               <h3 className="font-bold text-gray-800">Минусы</h3>
               {isEditing && (
-                <button 
+                <button
                   onClick={() => addItem('cons')}
                   className="text-rose-500 text-xs flex items-center hover:text-rose-600"
                 >
@@ -314,7 +347,7 @@ export const ApartmentCard: React.FC<Props> = ({
                         className="w-full border-b border-rose-200 focus:border-rose-500 focus:outline-none"
                         placeholder="Недостаток"
                       />
-                      <button 
+                      <button
                         onClick={() => removeItem('cons', index)}
                         className="ml-2 text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
