@@ -16,7 +16,8 @@ interface ApartmentType {
   pros: string[];
   cons: string[];
   imageUrl?: string;
-  city?: {name: string};
+  city?: { name: string };
+  isFeatured?: boolean;
 }
 
 export const ApartmentCard: React.FC<Props> = ({
@@ -106,7 +107,11 @@ export const ApartmentCard: React.FC<Props> = ({
   };
 
   return (
-    <div className={`relative flex items-start justify-start min-h-[400px] w-full bg-white p-6 rounded-xl shadow-md border border-gray-100 ${className}`}>
+    <div 
+  className={`relative flex items-start justify-start min-h-[400px] w-full bg-white p-6 rounded-xl shadow-md border border-gray-100 ${className} ${
+    apartment.isFeatured ? "opacity-60" : ""
+  }`}
+>
       {/* Кнопки управления */}
       <div className="absolute top-4 right-4 flex gap-2">
         {isEditing ? (
@@ -195,7 +200,7 @@ export const ApartmentCard: React.FC<Props> = ({
               placeholder="Название квартиры"
             />
           ) : (
-            <h2 
+            <h2
               className={`text-2xl font-semibold text-gray-900 ${formData.url ? 'cursor-pointer hover:text-rose-600' : ''}`}
               onClick={handleTitleClick}
             >
@@ -243,6 +248,20 @@ export const ApartmentCard: React.FC<Props> = ({
             </div>
           )}
         </div>
+
+        {isEditing && (
+          <div className="flex items-center mx-4 my-10">
+            <label className="flex items-center gap-2 text-md text-gray-600">
+              <input
+                type="checkbox"
+                className="h-5 w-5"
+                checked={formData.isFeatured}
+                onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+              />
+              Скрыть
+            </label>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col h-full w-[40%]">

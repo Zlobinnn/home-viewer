@@ -10,6 +10,7 @@ interface ApartmentType {
   pros: string[];
   cons: string[];
   city?: { name: string };
+  isFeatured?: boolean;
 }
 
 export const useApartments = (cityId?: number) => {
