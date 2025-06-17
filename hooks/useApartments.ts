@@ -9,9 +9,10 @@ interface ApartmentType {
   address: string;
   pros: string[];
   cons: string[];
+  city?: { name: string };
 }
 
-export const useApartments = (cityId?: string) => {
+export const useApartments = (cityId?: number) => {
   const [apartments, setApartments] = useState<ApartmentType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);

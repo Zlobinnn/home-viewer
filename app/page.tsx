@@ -6,15 +6,15 @@ import { ApartmentCard } from "@/components/apartmentCard";
 
 export default function Home() {
   const { cities, loading: citiesLoading, error: citiesError } = useCities();
-  const [activeTab, setActiveTab] = useState<string>("");
-  
-  const { 
-    apartments, 
-    loading: apartmentsLoading, 
-    error: apartmentsError, 
-    addApartment, 
+  const [activeTab, setActiveTab] = useState<number>(1);
+
+  const {
+    apartments,
+    loading: apartmentsLoading,
+    error: apartmentsError,
+    addApartment,
     deleteApartment,
-    updateApartment 
+    updateApartment
   } = useApartments(activeTab);
 
   // Установим активную вкладку после загрузки городов
@@ -34,7 +34,7 @@ export default function Home() {
       cons: [],
       cityId: activeTab,
     };
-    
+
     try {
       await addApartment(newApartment);
     } catch (err) {
@@ -73,11 +73,10 @@ export default function Home() {
         {cities.map((city) => (
           <button
             key={city.id}
-            className={`px-6 py-3 rounded-lg font-medium text-lg transition-colors ${
-              activeTab === city.id
+            className={`px-6 py-3 rounded-lg font-medium text-lg transition-colors ${activeTab === city.id
                 ? "bg-amber-500 text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
+              }`}
             onClick={() => setActiveTab(city.id)}
           >
             {city.name}
@@ -93,11 +92,11 @@ export default function Home() {
           </div>
         ) : (
           apartments.map((apartment) => (
-            <ApartmentCard 
+            <ApartmentCard
               key={apartment.id}
               apartment={apartment}
-              onDelete={() => deleteApartment(apartment.id || 0)} cityName={cities.find(city => city.id === activeTab)?.name || ''}
-              onSave={(data) => updateApartment(data)}/>
+              onDelete={() => deleteApartment(apartment.id || 0)}
+              onSave={(data) => updateApartment(data)} />
           ))
         )}
       </div>

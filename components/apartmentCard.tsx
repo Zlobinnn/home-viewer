@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 
 interface Props {
-  cityName: string;
   onDelete?: (id: string) => Promise<void>;
   onSave?: (data: ApartmentType) => Promise<void>;
   className?: string;
@@ -17,11 +16,11 @@ interface ApartmentType {
   pros: string[];
   cons: string[];
   imageUrl?: string;
+  city?: {name: string};
 }
 
 export const ApartmentCard: React.FC<Props> = ({
   apartment,
-  cityName,
   onDelete,
   onSave,
   className
@@ -204,7 +203,7 @@ export const ApartmentCard: React.FC<Props> = ({
             </h2>
           )}
           <span className="px-3 py-1 bg-rose-50 text-rose-600 text-sm font-medium rounded-full">
-            {cityName}
+            {apartment.city?.name}
           </span>
         </div>
         <div className="flex-1 bg-gray-50 rounded-lg overflow-hidden">
@@ -235,7 +234,8 @@ export const ApartmentCard: React.FC<Props> = ({
             <img
               src={formData.imageUrl}
               alt={formData.title || 'Квартира'}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover hover:cursor-pointer"
+              onClick={handleTitleClick}
             />
           ) : (
             <div className="flex items-center justify-center h-full w-full bg-gray-200 text-gray-500">

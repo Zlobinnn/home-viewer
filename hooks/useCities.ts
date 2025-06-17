@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 
 interface City {
-  id: string; // или number, в зависимости от вашего API
+  id: number; // или number, в зависимости от вашего API
   name: string;
 }
 
