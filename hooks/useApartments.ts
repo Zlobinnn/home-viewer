@@ -17,29 +17,30 @@ export const useApartments = (cityId?: number) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchApartments = async () => {
-      try {
-        const url = `/api/apartments?cityId=${cityId}`
-
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        setApartments(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error');
-      } finally {
-        setLoading(false);
+  const fetchApartments = async () => {
+    try {
+      setLoading(true);
+      const url = `/api/apartments${cityId ? `?cityId=${cityId}` : ''}`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
       }
-    };
+      const data = await response.json();
+      setApartments(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchApartments();
   }, [cityId]);
 
   const addApartment = async (newApartment: ApartmentType) => {
     try {
+      setLoading(true);
       const response = await fetch('/api/apartments', {
         method: 'POST',
         headers: {
@@ -47,9 +48,10 @@ export const useApartments = (cityId?: number) => {
         },
         body: JSON.stringify(newApartment),
       });
-      const data = await response.json();
-      setApartments(prev => [...prev, data]);
-      return data;
+      if (!response.ok) {
+        throw new Error('Failed to add apartment');
+      }
+      await fetchApartments(); // Перезапрашиваем список после добавления
     } catch (err) {
       throw err instanceof Error ? err : new Error('Failed to add apartment');
     }
@@ -57,10 +59,10 @@ export const useApartments = (cityId?: number) => {
 
   const updateApartment = async (updatedData: ApartmentType) => {
     try {
-      // Преобразуем price в число, если он строковый
+      setLoading(true);
       const dataToSend = {
         ...updatedData,
-        price: Number(updatedData.price), // Принудительно преобразуем в number
+        price: Number(updatedData.price),
       };
 
       const response = await fetch(`/api/apartments/${updatedData.id}`, {
@@ -68,22 +70,14 @@ export const useApartments = (cityId?: number) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(dataToSend), // Отправляем исправленные данные
+        body: JSON.stringify(dataToSend),
       });
 
       if (!response.ok) {
         throw new Error('Failed to update apartment');
       }
 
-      const updatedApartment = await response.json();
-
-      setApartments(prev =>
-        prev.map(apt =>
-          apt.id === updatedData.id ? { ...apt, ...updatedApartment } : apt
-        )
-      );
-
-      return updatedApartment;
+      await fetchApartments(); // Перезапрашиваем список после обновления
     } catch (err) {
       throw err instanceof Error ? err : new Error('Failed to update apartment');
     }
@@ -91,10 +85,14 @@ export const useApartments = (cityId?: number) => {
 
   const deleteApartment = async (id: number) => {
     try {
-      await fetch(`/api/apartments/${id}`, {
+      setLoading(true);
+      const response = await fetch(`/api/apartments/${id}`, {
         method: 'DELETE',
       });
-      setApartments(prev => prev.filter(apt => apt.id !== id));
+      if (!response.ok) {
+        throw new Error('Failed to delete apartment');
+      }
+      await fetchApartments(); // Перезапрашиваем список после удаления
     } catch (err) {
       throw err instanceof Error ? err : new Error('Failed to delete apartment');
     }

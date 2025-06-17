@@ -9,6 +9,7 @@ export async function GET() {
         id: true,
         name: true,
         description: true,
+        date: true,
         _count: {
           select: { apartments: true }
         }

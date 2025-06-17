@@ -12,6 +12,7 @@ model City {
   id          Int         @id @default(autoincrement())
   name        String      @unique
   description String?
+  date        String?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   apartments  Apartment[]

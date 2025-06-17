@@ -42,7 +42,7 @@ export default function Home() {
     }
   };
 
-  if (citiesLoading || apartmentsLoading) {
+  if (citiesLoading) {
     return <div className="flex justify-center items-center h-screen">Загрузка...</div>;
   }
 
@@ -74,19 +74,30 @@ export default function Home() {
           <button
             key={city.id}
             className={`px-6 py-3 rounded-lg font-medium text-lg transition-colors ${activeTab === city.id
-                ? "bg-amber-500 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              ? "bg-amber-500 text-white"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             onClick={() => setActiveTab(city.id)}
           >
-            {city.name}
+            <div className="flex flex-col">
+              {city.name}
+              <div className="text-sm">
+                {city.date}
+              </div>
+            </div>
           </button>
         ))}
       </div>
 
       {/* Список квартир */}
       <div className="flex flex-col items-center justify-center gap-4 w-full max-w-4xl">
-        {apartments.length === 0 ? (
+        {apartmentsLoading ? (
+          <div className="text-center py-10">
+            {/* Можно заменить на любой спиннер или анимацию загрузки */}
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+            <p className="mt-2 text-gray-500">Загрузка данных...</p>
+          </div>
+        ) : apartments.length === 0 ? (
           <div className="text-center py-10 text-gray-500">
             Нет квартир в выбранном городе
           </div>
@@ -96,7 +107,8 @@ export default function Home() {
               key={apartment.id}
               apartment={apartment}
               onDelete={() => deleteApartment(apartment.id || 0)}
-              onSave={(data) => updateApartment(data)} />
+              onSave={(data) => updateApartment(data)}
+            />
           ))
         )}
       </div>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 interface City {
   id: number; // или number, в зависимости от вашего API
   name: string;
+  date: string;
 }
 
 export const useCities = () => {
