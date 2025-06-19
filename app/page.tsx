@@ -3,6 +3,8 @@ import { useCities } from "@/hooks/useCities";
 import { useApartments } from "@/hooks/useApartments";
 import { useState, useEffect } from "react";
 import { ApartmentCard } from "@/components/apartmentCard";
+import { Menu } from "@/components/menu";
+import { Tabs } from "@/components/tabs";
 
 export default function Home() {
   const { cities, loading: citiesLoading, error: citiesError } = useCities();
@@ -15,7 +17,9 @@ export default function Home() {
     error: apartmentsError,
     addApartment,
     deleteApartment,
-    updateApartment
+    updateApartment,
+    getAverageRating,
+    rateApartment,
   } = useApartments(activeTab);
 
   // Установим активную вкладку после загрузки городов
@@ -44,8 +48,8 @@ export default function Home() {
   };
 
   // Фильтрация квартир в зависимости от состояния чекбокса
-  const filteredApartments = showHidden 
-    ? apartments 
+  const filteredApartments = showHidden
+    ? apartments
     : apartments.filter(apartment => !apartment.isFeatured);
 
   if (citiesLoading) {
@@ -63,54 +67,15 @@ export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center p-4">
       {/* Заголовок и кнопка добавления */}
-      <div className="flex justify-between items-center w-full max-w-4xl mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Каталог квартир</h1>
-        <div className="flex flex-col items-end gap-2">
-          <button
-            onClick={handleAddApartment}
-            className="flex items-center gap-2 px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors"
-            disabled={!activeTab}
-          >
-            Добавить квартиру
-          </button>
-          <label className="flex items-center gap-2 text-sm text-gray-600">
-            <input
-              type="checkbox"
-              checked={showHidden}
-              onChange={(e) => setShowHidden(e.target.checked)}
-              className="rounded text-rose-500 focus:ring-rose-500"
-            />
-            Показывать скрытые
-          </label>
-        </div>
-      </div>
+      <Menu handleAddApartment={handleAddApartment} showHidden={showHidden} setShowHidden={setShowHidden} activeTab={activeTab} />
 
       {/* Вкладки */}
-      <div className="flex gap-2 mb-6 w-full max-w-4xl">
-        {cities.map((city) => (
-          <button
-            key={city.id}
-            className={`px-6 py-3 rounded-lg font-medium text-lg transition-colors ${activeTab === city.id
-              ? "bg-amber-500 text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            onClick={() => setActiveTab(city.id)}
-          >
-            <div className="flex flex-col">
-              {city.name}
-              <div className="text-sm">
-                {city.date}
-              </div>
-            </div>
-          </button>
-        ))}
-      </div>
+      <Tabs cities={cities} activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {/* Список квартир */}
       <div className="flex flex-col items-center justify-center gap-4 w-full max-w-4xl">
         {apartmentsLoading ? (
           <div className="text-center py-10">
-            {/* Можно заменить на любой спиннер или анимацию загрузки */}
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto flex items-center justify-center">
               <span className="text-2xl">🍆</span><span className="text-2xl">🍆</span>
             </div>
@@ -127,6 +92,8 @@ export default function Home() {
               apartment={apartment}
               onDelete={() => deleteApartment(apartment.id || 0)}
               onSave={(data) => updateApartment(data)}
+              rateApartment={rateApartment}
+              getAverageRating={getAverageRating}
             />
           ))
         )}

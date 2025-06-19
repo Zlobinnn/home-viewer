@@ -16,7 +16,8 @@ export async function GET(
             id: true,
             name: true
           }
-        }
+        },
+        ratings: true,
       }
     })
 
@@ -48,7 +49,7 @@ export async function PUT(
     
     // Удаляем id из данных, если он там есть
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id: _, cityId: __, city: ___, ...updateData } = data;
+    const { id: _, cityId: __, city: ___, ratings:____, ...updateData } = data;
 
     const updatedApartment = await prisma.apartment.update({
       where: { id: parseInt(id) },

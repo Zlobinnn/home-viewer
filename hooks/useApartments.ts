@@ -1,6 +1,16 @@
 // hooks/useApartments.ts
 import { useState, useEffect } from 'react';
 
+interface RatingType {
+  id: number;
+  userToken: string;
+  rating: number;
+  apartmentId: number;
+  createdAt: string;
+  updatedAt: string;
+  ratings?: RatingType[];
+}
+
 interface ApartmentType {
   id?: number;
   title: string;
@@ -99,12 +109,48 @@ export const useApartments = (cityId?: number) => {
     }
   };
 
+  const getAverageRating = (ratings: RatingType[] = []) => {
+    if (ratings.length === 0) return null;
+    const total = ratings.reduce((sum, r) => sum + r.rating, 0);
+    return total / ratings.length;
+  };
+
+  const rateApartment = async (apartmentId: number, rating: number, userToken: string) => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/ratings', {
+        method: 'POST', // или PUT, если хотите обновлять
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          apartmentId,
+          rating,
+          userToken,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to rate apartment');
+      }
+
+      await fetchApartments(); // Обновим список, чтобы подтянуть рейтинг
+    } catch (err) {
+      throw err instanceof Error ? err : new Error('Failed to rate apartment');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   return {
     apartments,
     loading,
     error,
     addApartment,
     updateApartment,
-    deleteApartment
+    deleteApartment,
+    rateApartment,
+    getAverageRating
   };
 };

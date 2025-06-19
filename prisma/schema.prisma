@@ -37,4 +37,17 @@ model Apartment {
   updatedAt   DateTime @updatedAt
   city        City     @relation(fields: [cityId], references: [id])
   cityId      Int
+  ratings     Rating[]
+}
+
+model Rating {
+  id          Int       @id @default(autoincrement())
+  userToken   String
+  rating      Int       // Например, от 1 до 5
+  apartment   Apartment @relation(fields: [apartmentId], references: [id])
+  apartmentId Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([userToken, apartmentId]) // Один пользователь — одна оценка на квартиру
 }

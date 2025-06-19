@@ -14,7 +14,8 @@ export async function GET(request: NextRequest) {
           select: {
             name: true
           }
-        }
+        },
+        ratings: true,
       },
       orderBy: {
         createdAt: 'desc'

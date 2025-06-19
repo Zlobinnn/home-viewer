@@ -1,13 +1,41 @@
-import React, { useState } from "react";
+import { useToken } from "@/hooks/useToken";
+import React, { useEffect, useState } from "react";
+import { StarRating } from "./starRating";
+
+interface RatingType {
+  id: number;
+  userToken: string;
+  rating: number;
+  apartmentId: number;
+  createdAt: string;
+  updatedAt: string;
+  ratings?: RatingType[];
+}
 
 interface Props {
   onDelete?: (id: string) => Promise<void>;
   onSave?: (data: ApartmentType) => Promise<void>;
   className?: string;
   apartment: ApartmentType;
+  rateApartment: (apartmentId: number, rating: number, userToken: string) => Promise<void>;
+  getAverageRating: (ratings: RatingType[]) => number | null;
 }
 
 interface ApartmentType {
+  id?: number;
+  title: string;
+  url: string;
+  price: number;
+  address: string;
+  pros: string[];
+  cons: string[];
+  imageUrl?: string;
+  city?: { name: string };
+  isFeatured?: boolean;
+  ratings?: RatingType[];
+}
+
+interface DataType {
   id?: number;
   title: string;
   url: string;
@@ -24,14 +52,22 @@ export const ApartmentCard: React.FC<Props> = ({
   apartment,
   onDelete,
   onSave,
-  className
+  className,
+  rateApartment,
+  getAverageRating,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [formData, setFormData] = useState<ApartmentType>({
+  const [formData, setFormData] = useState<DataType>({
     ...apartment,
   });
+  const { token } = useToken();
+  const [rating, setRating] = useState<number>(0);
+
+  useEffect(() => {
+    setRating(apartment.ratings?.find((r) => r.userToken === token)?.rating || 0);
+  }, [token]);
 
   const handleInputChange = (field: keyof typeof formData, value: string | string[] | number) => {
     setFormData(prev => ({
@@ -74,6 +110,15 @@ export const ApartmentCard: React.FC<Props> = ({
       await onSave({
         ...formData,
       });
+
+      if (rating !== 0) {
+        await rateApartment(
+          apartment!.id || 0,
+          rating,
+          token || '',
+        );
+      }
+      
       setIsEditing(false);
     } catch (error) {
       console.error("Ошибка при сохранении:", error);
@@ -107,11 +152,10 @@ export const ApartmentCard: React.FC<Props> = ({
   };
 
   return (
-    <div 
-  className={`relative flex items-start justify-start min-h-[400px] w-full bg-white p-6 rounded-xl shadow-md border border-gray-100 ${className} ${
-    apartment.isFeatured ? "opacity-60" : ""
-  }`}
->
+    <div
+      className={`relative flex items-start justify-start min-h-[400px] w-full bg-white p-6 rounded-xl shadow-md border border-gray-100 ${className} ${apartment.isFeatured ? "opacity-60" : ""
+        }`}
+    >
       {/* Кнопки управления */}
       <div className="absolute top-4 right-4 flex gap-2">
         {isEditing ? (
@@ -386,6 +430,15 @@ export const ApartmentCard: React.FC<Props> = ({
             </ul>
           </div>
         </div>
+
+        <div className="mt-2">
+          <StarRating
+            editable={isEditing}
+            value={isEditing ? (rating) : Math.round(getAverageRating(apartment.ratings || []) || 0)}
+            onChange={(val) => setRating(val)}
+          />
+        </div>
+
       </div>
     </div>
   );
