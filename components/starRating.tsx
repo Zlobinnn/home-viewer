@@ -18,7 +18,7 @@ export const StarRating: React.FC<{
           return (
             <div
               key={index}
-              className="relative"
+              className={`relative transition-transform duration-200 ${editable ? "hover:scale-110" : ""}`}
               onClick={() => handleClick(index)}
               style={{ cursor: editable ? "pointer" : "default" }}
             >
@@ -30,7 +30,7 @@ export const StarRating: React.FC<{
 
               {/* Заполненная часть звезды */}
               <div
-                className="absolute top-0 left-0"
+                className="absolute top-0 left-0 transition-all duration-300"
                 style={{
                   width: `${filledPercentage * 100}%`,
                   overflow: "hidden"
