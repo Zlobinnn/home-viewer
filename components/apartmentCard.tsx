@@ -50,7 +50,7 @@ interface DataType {
 
 export const ApartmentCard: React.FC<Props> = ({
   apartment,
-  onDelete,
+  // onDelete,
   onSave,
   className,
   rateApartment,
@@ -58,7 +58,7 @@ export const ApartmentCard: React.FC<Props> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  // const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [formData, setFormData] = useState<DataType>({
     ...apartment,
   });
@@ -93,7 +93,7 @@ export const ApartmentCard: React.FC<Props> = ({
 
   const toggleEdit = () => {
     setIsEditing(!isEditing);
-    setShowDeleteConfirm(false);
+    // setShowDeleteConfirm(false);
     if (!isEditing) {
       // Сброс формы при отмене редактирования
       setFormData({
@@ -127,14 +127,14 @@ export const ApartmentCard: React.FC<Props> = ({
     }
   };
 
-  const handleDelete = async () => {
-    if (!onDelete) return;
-    try {
-      await onDelete((apartment.id || 0).toString());
-    } catch (error) {
-      console.error("Ошибка при удалении:", error);
-    }
-  };
+  // const handleDelete = async () => {
+  //   if (!onDelete) return;
+  //   try {
+  //     await onDelete((apartment.id || 0).toString());
+  //   } catch (error) {
+  //     console.error("Ошибка при удалении:", error);
+  //   }
+  // };
 
   const formatPrice = (price?: number | null) => {
     if (!price) return "Цена не указана";
@@ -185,7 +185,7 @@ export const ApartmentCard: React.FC<Props> = ({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            {onDelete && (
+            {/* {onDelete && (
               <div className="relative">
                 <button
                   onClick={() => setShowDeleteConfirm(!showDeleteConfirm)}
@@ -218,7 +218,7 @@ export const ApartmentCard: React.FC<Props> = ({
                   </div>
                 )}
               </div>
-            )}
+            )} */}
           </>
         ) : (
           <button
@@ -434,7 +434,7 @@ export const ApartmentCard: React.FC<Props> = ({
         <div className="mt-2">
           <StarRating
             editable={isEditing}
-            value={isEditing ? (rating) : Math.round(getAverageRating(apartment.ratings || []) || 0)}
+            value={isEditing ? (rating) : getAverageRating(apartment.ratings || []) || 0}
             onChange={(val) => setRating(val)}
           />
         </div>
